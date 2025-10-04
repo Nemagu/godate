@@ -17,10 +17,15 @@ var epoch = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 
 type Date uint32
 
+// ZeroDate returns Date instance which corresponds zero value Date - "0001-01-01" or 0.
 func ZeroDate() Date {
 	return Date(0)
 }
 
+// New returns Date instance and error from given year, month and day.
+// If year was out of range [1, 9999]
+// and month was out of range [1, 12]
+// and day was more than days count in month function returned error.
 func New(year int, month time.Month, day int) (Date, error) {
 	if err := ValidateDate(year, month, day); err != nil {
 		return Date(0), err
@@ -28,6 +33,10 @@ func New(year int, month time.Month, day int) (Date, error) {
 	return fromTime(time.Date(year, month, day, 0, 0, 0, 0, time.UTC)), nil
 }
 
+// MustNew returns Date instance and error from given year, month and day.
+// If year was out of range [1, 9999]
+// and month was out of range [1, 12]
+// and day was more than days count in month function called panic!
 func MustNew(year int, month time.Month, day int) Date {
 	if err := ValidateDate(year, month, day); err != nil {
 		panic(err)
@@ -35,10 +44,14 @@ func MustNew(year int, month time.Month, day int) Date {
 	return fromTime(time.Date(year, month, day, 0, 0, 0, 0, time.UTC))
 }
 
+// FromTime returns Date which corresponds given time.
 func FromTime(t time.Time) Date {
 	return fromTime(t)
 }
 
+// FromString returns the Date instance which corresponds given string.
+// It function use time.Parse with time.DateOnly("2006-01-02") layout string
+// so if it returns err FromString returns this error.
 func FromString(s string) (Date, error) {
 	t, err := time.Parse(time.DateOnly, s)
 	if err != nil {
@@ -56,14 +69,17 @@ func fromTime(t time.Time) Date {
 	return Date(zeroOffset + secs/secondsPerDay)
 }
 
+// Today returns the Date instance based on your UTC offset.
 func Today() Date {
 	return fromTime(time.Now())
 }
 
+// TodayUTC returns the Date instance based on zero UTC offset.
 func TodayUTC() Date {
 	return fromTime(time.Now().UTC())
 }
 
+// ValidateDate validate given year, month and day for exists.
 func ValidateDate(year int, month time.Month, day int) error {
 	if year < 1 || year > 9999 {
 		return fmt.Errorf("invalid year: %d", year)
@@ -77,7 +93,9 @@ func ValidateDate(year int, month time.Month, day int) error {
 	return nil
 }
 
-func (d Date) ToTime(loc *time.Location) time.Time {
+// ToTime returns time.Time instance
+// which corresponds Date with 0 minutes, 0 seconds etc and based on zero UTC offset.
+func (d Date) ToTime() time.Time {
 	return d.toTime()
 }
 
@@ -85,10 +103,12 @@ func (d Date) toTime() time.Time {
 	return epoch.AddDate(0, 0, int(d))
 }
 
+// Date returns (year, month, day) for Date instance.
 func (d Date) Date() (int, time.Month, int) {
 	return d.toTime().Date()
 }
 
+// Year returns year for Date instance.
 func (d Date) Year() int {
 	if d.IsZero() {
 		return 1
@@ -96,6 +116,7 @@ func (d Date) Year() int {
 	return d.toTime().Year()
 }
 
+// Month returns month for Date instance.
 func (d Date) Month() time.Month {
 	if d.IsZero() {
 		return time.January
@@ -103,6 +124,7 @@ func (d Date) Month() time.Month {
 	return d.toTime().Month()
 }
 
+// Day returns day for Date instance.
 func (d Date) Day() int {
 	if d.IsZero() {
 		return 1
@@ -110,10 +132,12 @@ func (d Date) Day() int {
 	return d.toTime().Day()
 }
 
+// IsZero reports whether d represents the zero Date("0001-01-01").
 func (d Date) IsZero() bool {
 	return d == 0
 }
 
+// String returns Date instance formatted using the ISO standard("YYYY-MM-DD")
 func (d Date) String() string {
 	if d.IsZero() {
 		return "0001-01-01"
