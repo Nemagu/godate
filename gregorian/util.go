@@ -4,7 +4,7 @@ import "time"
 
 var daysInMonth = []int{
 	0,
-	31, //January
+	31, // January
 	28,
 	31, // March
 	30,

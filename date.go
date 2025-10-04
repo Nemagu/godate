@@ -7,42 +7,65 @@ import (
 	"github.com/Nemagu/godate/gregorian"
 )
 
-type Date struct {
-	year  int
-	month time.Month
-	day   int
+const (
+	maxDays       = 3_652_060
+	zeroOffset    = 719_162
+	secondsPerDay = 24 * 60 * 60
+)
+
+var epoch = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
+
+type Date uint32
+
+func ZeroDate() Date {
+	return Date(0)
 }
 
-func NewDate(year int, month time.Month, day int) (Date, error) {
+func New(year int, month time.Month, day int) (Date, error) {
 	if err := ValidateDate(year, month, day); err != nil {
-		return Date{}, err
+		return Date(0), err
 	}
-	return Date{
-		year:  year,
-		month: month,
-		day:   day,
-	}, nil
+	return fromTime(time.Date(year, month, day, 0, 0, 0, 0, time.UTC)), nil
 }
 
-func Today() Date {
-	timeNow := time.Now()
-	return Date{
-		year:  timeNow.Year(),
-		month: timeNow.Month(),
-		day:   timeNow.Day(),
+func MustNew(year int, month time.Month, day int) Date {
+	if err := ValidateDate(year, month, day); err != nil {
+		panic(err)
 	}
+	return fromTime(time.Date(year, month, day, 0, 0, 0, 0, time.UTC))
 }
 
 func FromTime(t time.Time) Date {
-	return Date{
-		year:  t.Year(),
-		month: t.Month(),
-		day:   t.Day(),
+	return fromTime(t)
+}
+
+func FromString(s string) (Date, error) {
+	t, err := time.Parse(time.DateOnly, s)
+	if err != nil {
+		return Date(0), err
 	}
+	return fromTime(t), nil
+}
+
+func fromTime(t time.Time) Date {
+	if t.IsZero() {
+		return Date(0)
+	}
+	_, offset := t.Zone()
+	secs := t.Unix() + int64(offset)
+	return Date(zeroOffset + secs/secondsPerDay)
+}
+
+func Today() Date {
+	return fromTime(time.Now())
+}
+
+func TodayUTC() Date {
+	return fromTime(time.Now().UTC())
 }
 
 func ValidateDate(year int, month time.Month, day int) error {
-	if year < 0 || year > 9999 {
+	if year < 1 || year > 9999 {
 		return fmt.Errorf("invalid year: %d", year)
 	}
 	if month < 1 || month > 12 {
@@ -54,22 +77,47 @@ func ValidateDate(year int, month time.Month, day int) error {
 	return nil
 }
 
+func (d Date) ToTime(loc *time.Location) time.Time {
+	return d.toTime()
+}
+
+func (d Date) toTime() time.Time {
+	return epoch.AddDate(0, 0, int(d))
+}
+
+func (d Date) Date() (int, time.Month, int) {
+	return d.toTime().Date()
+}
+
 func (d Date) Year() int {
-	return d.year
+	if d.IsZero() {
+		return 1
+	}
+	return d.toTime().Year()
 }
 
 func (d Date) Month() time.Month {
-	return d.month
+	if d.IsZero() {
+		return time.January
+	}
+	return d.toTime().Month()
 }
 
 func (d Date) Day() int {
-	return d.day
+	if d.IsZero() {
+		return 1
+	}
+	return d.toTime().Day()
 }
 
-func (d Date) ToTime(loc *time.Location) time.Time {
-	return time.Date(d.year, d.month, d.day, 0, 0, 0, 0, loc)
+func (d Date) IsZero() bool {
+	return d == 0
 }
 
-func (d *Date) String() string {
-	return fmt.Sprintf("%04d-%02d-%02d", d.year, d.month, d.day)
+func (d Date) String() string {
+	if d.IsZero() {
+		return "0001-01-01"
+	}
+	year, month, day := d.Date()
+	return fmt.Sprintf("%04d-%02d-%02d", year, month, day)
 }
