@@ -1,6 +1,9 @@
 package godate
 
-import "encoding/json"
+import (
+	_ "encoding"
+	"encoding/json"
+)
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
 // The output matches that of calling the [Date.String] method.
