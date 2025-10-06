@@ -1,11 +1,18 @@
 package godate
 
 import (
+	_ "database/sql"
 	"database/sql/driver"
 	"fmt"
 	"time"
 )
 
+// Scan implements the [sql.Scanner].
+//
+// Scan parse some value. If the value is nil the date will be zero.
+// If the value holds string or []byte it calls [FromString] method.
+// If the value holds [time.Time] it calls [FromTime] method.
+// Else Scan returns error.
 func (d *Date) Scan(src any) error {
 	var err error
 	switch src := src.(type) {
@@ -23,6 +30,10 @@ func (d *Date) Scan(src any) error {
 	return err
 }
 
+// Value implements the [driver.Valuer].
+//
+// If [Date.IsZero] is true Value return nil as value for database,
+// else it is false Value returns [Date.String] method's result.
 func (d Date) Value() (driver.Value, error) {
 	if d.IsZero() {
 		return nil, nil
