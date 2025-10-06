@@ -5,5 +5,5 @@ You can use only ISO format (YYYY-MM-DD) for string present Date and store in da
 
 ## Installation
 
-    go get github.com/Nemagu/godate/v1
+    go get github.com/Nemagu/godate
 
