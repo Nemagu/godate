@@ -18,6 +18,7 @@ var daysInMonth = []int{
 	31,
 }
 
+// DaysInYear returns the number of days in a given year.
 func DaysInYear(year int) int {
 	if isLeap(year) {
 		return 366
@@ -25,6 +26,7 @@ func DaysInYear(year int) int {
 	return 365
 }
 
+// DaysInYear returns the number of days in a given month in given year.
 func DaysInMonth(year int, month time.Month) int {
 	if month == time.February && isLeap(year) {
 		return 29
