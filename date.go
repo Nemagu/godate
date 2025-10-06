@@ -15,6 +15,16 @@ const (
 
 var epoch = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 
+// A Date represent one date from range from "0001-01-01" to "9999-12-31"
+//
+// A Date value can be used by multiple goroutines simultaneously except
+// that the methods [Date.UnmarshalJSON] and [Date.UnmarshalText] are not concurrency-safe.
+//
+// Date instances can be compared using the [Date.Before], [Date.After] and [Date.Equal] methods.
+// The [Date.Sub] method subtracts two instances, producing a [Duration].
+// The [Date.Add] method adds a Date and a Duration, producing a Date.
+//
+// Representations of a Date value saved by the [Date.MarshalJSON] and [Date.MarshalText] methods.
 type Date uint32
 
 // ZeroDate returns Date instance which corresponds zero value Date - "0001-01-01" or 0.
