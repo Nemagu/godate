@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Nemagu/godate/v1/gregorian"
+	"github.com/Nemagu/godate/gregorian"
 )
 
 const (

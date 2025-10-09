@@ -1,3 +1,3 @@
-module github.com/Nemagu/godate/v1
+module github.com/Nemagu/godate
 
 go 1.25
